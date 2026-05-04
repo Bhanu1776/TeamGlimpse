@@ -23,6 +23,7 @@ import { signOut } from "@/lib/auth/session";
 import {
   getNotificationPermissionState,
   requestNotificationPermission,
+  subscribeToPush,
 } from "@/lib/push/permissions";
 import type { User, ReminderPreference, NotificationPermissionState } from "@/types/domain";
 
@@ -89,8 +90,12 @@ export function SettingsPage() {
   const handleNotifRequest = async () => {
     const state = await requestNotificationPermission();
     setNotifState(state);
-    if (state === "granted") toast.success("Notifications enabled!");
-    else if (state === "denied") toast.error("Notifications blocked. Enable in browser settings.");
+    if (state === "granted") {
+      await subscribeToPush();
+      toast.success("Notifications enabled!");
+    } else if (state === "denied") {
+      toast.error("Notifications blocked. Enable in browser settings.");
+    }
   };
 
   const handleSignOut = async () => {

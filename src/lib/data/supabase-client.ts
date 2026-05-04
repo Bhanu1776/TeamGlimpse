@@ -24,7 +24,8 @@ async function getAuthUser() {
 
 export const supabaseClient = {
   // Not used — login is handled by signInWithGoogle() in @/lib/auth/session.
-  async signInMock(_name: string, _email: string): Promise<User> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async signInMock(..._args: unknown[]): Promise<User> {
     throw new Error("signInMock is not available. Use Google sign-in.");
   },
 
