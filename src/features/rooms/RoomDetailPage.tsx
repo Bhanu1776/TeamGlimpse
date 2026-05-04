@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pin, PinOff, ChevronLeft } from "lucide-react";
+import { Pin, PinOff, ChevronLeft, MoonStar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -122,7 +122,15 @@ export function RoomDetailPage({ params }: Props) {
             <ChevronLeft className="size-4" />
             Back
           </button>
-          <h1 className="text-xl font-bold tracking-tight">{room.name}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold tracking-tight">{room.name}</h1>
+            {room.isForTomorrow && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                <MoonStar className="size-3" />
+                tomorrow
+              </span>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground mt-1">
             {summaryParts.join(" · ")}
             {notUpdated > 0 ? ` · ${notUpdated} not updated` : ""}

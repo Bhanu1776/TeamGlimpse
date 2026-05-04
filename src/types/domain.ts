@@ -13,8 +13,9 @@ export interface RoomMember {
   name: string;
   email: string;
   avatarUrl: string;
+  // Resolved for the active target date — components never deal with dateKeys
   status: DailyStatus;
-  updatedAt: string | null; // ISO string, null = not yet updated today
+  updatedAt: string | null;
 }
 
 export interface Room {
@@ -26,6 +27,8 @@ export interface Room {
 
 export interface RoomDetail extends Room {
   members: RoomMember[];
+  targetDate: string;    // YYYY-MM-DD
+  isForTomorrow: boolean;
 }
 
 export interface PinnedPerson {
@@ -49,11 +52,14 @@ export interface HomeSummary {
     maybeCount: number;
     notUpdatedCount: number;
   })[];
+  targetDate: string;    // YYYY-MM-DD — the date statuses are being shown for
+  isForTomorrow: boolean; // true when clock is past the evening cutoff
 }
 
 export interface ReminderPreference {
   enabled: boolean;
-  time: string; // "HH:MM" 24h format, e.g. "09:00"
+  time: string;            // "HH:MM" 24h, e.g. "09:00"
+  eveningCutoffHour: number; // hour (0–23) after which app shows tomorrow's statuses
 }
 
 export type NotificationPermissionState =

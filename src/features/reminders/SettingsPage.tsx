@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Bell, BellOff, LogOut, RefreshCcw, Smartphone } from "lucide-react";
+import { Bell, BellOff, LogOut, MoonStar, RefreshCcw, Smartphone } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,10 +44,17 @@ const REMINDER_TIMES = Array.from({ length: 9 }, (_, i) => {
   return { value: `${hh}:${mm}`, label: `${displayH}:${mm} ${ampm}` };
 });
 
+// Evening cutoff options: 3pm–9pm
+const CUTOFF_OPTIONS = [15, 16, 17, 18, 19, 20, 21].map((h) => {
+  const ampm = h < 12 ? "AM" : "PM";
+  const display = h > 12 ? h - 12 : h;
+  return { value: h, label: `${display}:00 ${ampm}` };
+});
+
 export function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [reminder, setReminder] = useState<ReminderPreference>({ enabled: true, time: "09:00" });
+  const [reminder, setReminder] = useState<ReminderPreference>({ enabled: true, time: "09:00", eveningCutoffHour: 18 });
   const [notifState, setNotifState] = useState<NotificationPermissionState>("default");
   const [isStandalone, setIsStandalone] = useState(false);
   const [showReset, setShowReset] = useState(false);
@@ -77,6 +84,14 @@ export function SettingsPage() {
     setReminder(updated);
     await dataClient.updateReminderPreference(updated);
     toast.success("Reminder time updated");
+  };
+
+  const handleCutoffHour = async (hour: number) => {
+    const updated = { ...reminder, eveningCutoffHour: hour };
+    setReminder(updated);
+    await dataClient.updateReminderPreference(updated);
+    const label = CUTOFF_OPTIONS.find((o) => o.value === hour)?.label;
+    toast.success(`Tomorrow view flips after ${label}`);
   };
 
   const handleNotifRequest = async () => {
@@ -153,6 +168,32 @@ export function SettingsPage() {
                 </div>
               </>
             )}
+            <Separator />
+            {/* Evening cutoff — always shown, not gated on reminder toggle */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MoonStar className="size-4 text-muted-foreground" />
+                  <Label className="text-sm font-medium">Show tomorrow&apos;s statuses after</Label>
+                </div>
+                <Select
+                  value={String(reminder.eveningCutoffHour)}
+                  onValueChange={(v) => v && handleCutoffHour(Number(v))}
+                >
+                  <SelectTrigger className="w-28 h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CUTOFF_OPTIONS.map(({ value, label }) => (
+                      <SelectItem key={value} value={String(value)}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-xs text-muted-foreground pl-6">
+                After this time the app flips to tomorrow so you can plan ahead.
+              </p>
+            </div>
           </CardContent>
         </Card>
 

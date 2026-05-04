@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import { MapPin, Users, Bell } from "lucide-react";
+import { MapPin, Users, Bell, MoonStar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusChip } from "@/features/status/StatusChip";
 import { AppShell } from "@/components/app-shell/AppShell";
 import { dataClient } from "@/lib/data/client";
-import { formatFreshness, formatTodayHeader } from "@/lib/utils/dates";
+import { formatFreshness } from "@/lib/utils/dates";
 import type { HomeSummary, DailyStatus } from "@/types/domain";
 import { cn } from "@/lib/utils";
 import { storageGet, storageSet } from "@/lib/data/storage";
@@ -37,13 +38,11 @@ export function HomePage() {
   const [summary, setSummary] = useState<HomeSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState<DailyStatus | null>(null);
-  // Compute initial banner state lazily (avoids synchronous setState in effect)
   const [showPwaBanner, setShowPwaBanner] = useState(() => {
     if (typeof window === "undefined") return false;
     const dismissed = storageGet(PWA_BANNER_KEY, z.boolean());
     return !dismissed && !window.matchMedia("(display-mode: standalone)").matches;
   });
-  const { date, weekday } = formatTodayHeader();
 
   useEffect(() => {
     dataClient.getHomeSummary().then((s) => {
@@ -64,7 +63,8 @@ export function HomePage() {
     setSummary({ ...summary, todayStatus: status, todayStatusUpdatedAt: new Date().toISOString() });
     try {
       await dataClient.updateTodayStatus(status);
-      toast.success(`Status set to ${STATUS_OPTIONS.find((o) => o.value === status)?.label}`);
+      const label = STATUS_OPTIONS.find((o) => o.value === status)?.label;
+      toast.success(summary.isForTomorrow ? `Set for tomorrow: ${label}` : `Status: ${label}`);
     } catch {
       setSummary({ ...summary, todayStatus: prev });
       toast.error("Couldn't update status");
@@ -75,12 +75,27 @@ export function HomePage() {
 
   if (loading) return <AppShell><HomeLoadingSkeleton /></AppShell>;
 
+  // Derive date header from targetDate so it's always in sync with what we're showing
+  const targetDateObj = summary?.targetDate ? parseISO(summary.targetDate) : new Date();
+  const weekday = format(targetDateObj, "EEEE");
+  const date = format(targetDateObj, "MMMM d");
+  const isForTomorrow = summary?.isForTomorrow ?? false;
+
   return (
     <AppShell>
       <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-6">
+
         {/* Header */}
         <div>
-          <p className="text-muted-foreground text-sm">{weekday}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-muted-foreground text-sm">{weekday}</p>
+            {isForTomorrow && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                <MoonStar className="size-3" />
+                tomorrow
+              </span>
+            )}
+          </div>
           <h1 className="text-2xl font-bold tracking-tight">{date}</h1>
           {summary?.todayStatus && summary.todayStatus !== "undecided" && (
             <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -95,7 +110,11 @@ export function HomePage() {
         {/* Status control */}
         <Card>
           <CardContent className="pt-4">
-            <p className="text-sm font-medium mb-3">What&apos;s your plan today?</p>
+            <p className="text-sm font-medium mb-3">
+              {isForTomorrow
+                ? "What’s your plan for tomorrow?"
+                : "What’s your plan today?"}
+            </p>
             <div className="grid grid-cols-2 gap-2">
               {STATUS_OPTIONS.map(({ value, label }) => (
                 <button
@@ -122,6 +141,9 @@ export function HomePage() {
             <h2 className="font-semibold text-sm flex items-center gap-1.5">
               <MapPin className="size-4 text-muted-foreground" />
               Your pinned people
+              {isForTomorrow && (
+                <span className="text-xs font-normal text-muted-foreground">(tomorrow)</span>
+              )}
             </h2>
           </div>
           {!summary?.pinnedPeople.length ? (
@@ -157,6 +179,9 @@ export function HomePage() {
             <h2 className="font-semibold text-sm flex items-center gap-1.5">
               <Users className="size-4 text-muted-foreground" />
               Rooms
+              {isForTomorrow && (
+                <span className="text-xs font-normal text-muted-foreground">(tomorrow)</span>
+              )}
             </h2>
             <Link href="/rooms" className="text-xs text-primary underline underline-offset-4">
               See all
