@@ -35,6 +35,7 @@ export type Database = {
           avatar_url?: string | null;
           onboarding_complete?: boolean;
         };
+        Relationships: [];
       };
       rooms: {
         Row: {
@@ -55,6 +56,7 @@ export type Database = {
           name?: string;
           invite_code?: string;
         };
+        Relationships: [];
       };
       room_members: {
         Row: {
@@ -72,24 +74,26 @@ export type Database = {
         Update: {
           role?: string;
         };
+        Relationships: [];
       };
       daily_statuses: {
         Row: {
           user_id: string;
           status_date: string;
-          status: "going" | "wfh" | "maybe" | "undecided";
+          status: Database["public"]["Enums"]["daily_status"];
           updated_at: string;
         };
         Insert: {
           user_id: string;
           status_date: string;
-          status: "going" | "wfh" | "maybe" | "undecided";
+          status: Database["public"]["Enums"]["daily_status"];
           updated_at?: string;
         };
         Update: {
-          status?: "going" | "wfh" | "maybe" | "undecided";
+          status?: Database["public"]["Enums"]["daily_status"];
           updated_at?: string;
         };
+        Relationships: [];
       };
       pinned_people: {
         Row: {
@@ -102,7 +106,10 @@ export type Database = {
           pinned_user_id: string;
           created_at?: string;
         };
-        Update: Record<string, never>;
+        Update: {
+          [key: string]: never;
+        };
+        Relationships: [];
       };
       notification_preferences: {
         Row: {
@@ -125,6 +132,7 @@ export type Database = {
           evening_cutoff_hour?: number;
           tz?: string;
         };
+        Relationships: [];
       };
       push_subscriptions: {
         Row: {
@@ -151,6 +159,7 @@ export type Database = {
           last_seen_at?: string;
           user_agent?: string | null;
         };
+        Relationships: [];
       };
       notification_deliveries: {
         Row: {
@@ -175,6 +184,7 @@ export type Database = {
           status?: string;
           error?: string | null;
         };
+        Relationships: [];
       };
       allowed_email_domains: {
         Row: {
@@ -185,10 +195,15 @@ export type Database = {
           domain: string;
           added_at?: string;
         };
-        Update: Record<string, never>;
+        Update: {
+          [key: string]: never;
+        };
+        Relationships: [];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      [_ in never]: never;
+    };
     Functions: {
       get_home_summary: {
         Args: { p_target_date: string };
@@ -210,9 +225,54 @@ export type Database = {
         Args: { other: string };
         Returns: boolean;
       };
+      generate_invite_code: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
     };
     Enums: {
       daily_status: "going" | "wfh" | "maybe" | "undecided";
     };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
 };
+
+type PublicSchema = Database[Extract<keyof Database, "public">];
+
+export type Tables<
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R;
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    ? (PublicSchema["Tables"] & PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R;
+      }
+      ? R
+      : never
+    : never;
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never;

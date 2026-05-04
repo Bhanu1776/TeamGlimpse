@@ -15,8 +15,6 @@ import { dataClient } from "@/lib/data/client";
 import { formatFreshness } from "@/lib/utils/dates";
 import type { HomeSummary, DailyStatus } from "@/types/domain";
 import { cn } from "@/lib/utils";
-import { storageGet, storageSet } from "@/lib/data/storage";
-import { z } from "zod";
 
 const STATUS_OPTIONS: { value: DailyStatus; label: string }[] = [
   { value: "going", label: "Going" },
@@ -40,7 +38,7 @@ export function HomePage() {
   const [updatingStatus, setUpdatingStatus] = useState<DailyStatus | null>(null);
   const [showPwaBanner, setShowPwaBanner] = useState(() => {
     if (typeof window === "undefined") return false;
-    const dismissed = storageGet(PWA_BANNER_KEY, z.boolean());
+    const dismissed = localStorage.getItem(PWA_BANNER_KEY) === "true";
     return !dismissed && !window.matchMedia("(display-mode: standalone)").matches;
   });
 
@@ -52,7 +50,7 @@ export function HomePage() {
   }, []);
 
   const dismissPwaBanner = () => {
-    storageSet(PWA_BANNER_KEY, true);
+    localStorage.setItem(PWA_BANNER_KEY, "true");
     setShowPwaBanner(false);
   };
 
