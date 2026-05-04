@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { dataClient } from "@/lib/data/client";
+import { signOut } from "@/lib/auth/session";
 import { useRouter } from "next/navigation";
 import type { User } from "@/types/domain";
 
@@ -29,7 +29,7 @@ export function TopBar({ user }: TopBarProps) {
     .slice(0, 2);
 
   const handleSignOut = async () => {
-    await dataClient.signOut();
+    await signOut();
     router.replace("/login");
   };
 

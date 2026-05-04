@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { dataClient } from "@/lib/data/client";
-import { useSession } from "@/lib/auth/mock-session";
+import { useSession } from "@/lib/auth/session";
 
 export function OnboardingPage() {
   const { session, refresh } = useSession();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "@/lib/auth/mock-session";
+import { useSession } from "@/lib/auth/session";
 import { TopBar } from "./TopBar";
 import { BottomNav } from "./BottomNav";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Bell, BellOff, LogOut, MoonStar, RefreshCcw, Smartphone } from "lucide-react";
+import { Bell, BellOff, LogOut, MoonStar, Smartphone } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,17 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { AppShell } from "@/components/app-shell/AppShell";
 import { dataClient } from "@/lib/data/client";
+import { signOut } from "@/lib/auth/session";
 import {
   getNotificationPermissionState,
   requestNotificationPermission,
@@ -57,7 +50,6 @@ export function SettingsPage() {
   const [reminder, setReminder] = useState<ReminderPreference>({ enabled: true, time: "09:00", eveningCutoffHour: 18 });
   const [notifState, setNotifState] = useState<NotificationPermissionState>("default");
   const [isStandalone, setIsStandalone] = useState(false);
-  const [showReset, setShowReset] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -102,14 +94,8 @@ export function SettingsPage() {
   };
 
   const handleSignOut = async () => {
-    await dataClient.signOut();
+    await signOut();
     router.replace("/login");
-  };
-
-  const handleReset = async () => {
-    await dataClient.resetMockData();
-    toast("Mock data reset.");
-    setTimeout(() => window.location.replace("/login"), 500);
   };
 
   const initials = user?.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) ?? "?";
@@ -253,32 +239,8 @@ export function SettingsPage() {
             <LogOut className="size-4" />
             Sign out
           </Button>
-          <Button
-            variant="ghost"
-            onClick={() => setShowReset(true)}
-            className="flex items-center gap-2 text-destructive hover:text-destructive"
-          >
-            <RefreshCcw className="size-4" />
-            Reset mock data
-          </Button>
         </div>
       </div>
-
-      <Dialog open={showReset} onOpenChange={setShowReset}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reset mock data?</DialogTitle>
-            <DialogDescription>
-              This clears all localStorage state and returns to the login screen. Useful for testing
-              fresh flows.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowReset(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleReset}>Reset</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </AppShell>
   );
 }
