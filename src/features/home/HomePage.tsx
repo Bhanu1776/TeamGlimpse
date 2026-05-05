@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import { MapPin, Users, Bell, MoonStar } from "lucide-react";
+import { MapPin, Users, MoonStar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,11 +23,23 @@ const STATUS_OPTIONS: { value: DailyStatus; label: string }[] = [
   { value: "undecided", label: "Not decided" },
 ];
 
-const statusColors: Record<DailyStatus, string> = {
-  going: "border-emerald-300 bg-emerald-50 text-emerald-800 data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:border-emerald-500",
-  wfh: "border-sky-300 bg-sky-50 text-sky-800 data-[active=true]:bg-sky-500 data-[active=true]:text-white data-[active=true]:border-sky-500",
-  maybe: "border-amber-300 bg-amber-50 text-amber-800 data-[active=true]:bg-amber-500 data-[active=true]:text-white data-[active=true]:border-amber-500",
-  undecided: "border-border bg-muted text-muted-foreground data-[active=true]:bg-secondary data-[active=true]:text-secondary-foreground data-[active=true]:border-secondary",
+const statusButtonStyle: Record<DailyStatus, { idle: string; active: string }> = {
+  going: {
+    idle: "border-[var(--status-going-surface)] text-[var(--status-going)] bg-[var(--status-going-surface)]",
+    active: "border-[var(--status-going)] bg-[var(--status-going)] text-[var(--status-going-fg)]",
+  },
+  wfh: {
+    idle: "border-[var(--status-wfh-surface)] text-[var(--status-wfh)] bg-[var(--status-wfh-surface)]",
+    active: "border-[var(--status-wfh)] bg-[var(--status-wfh)] text-[var(--status-wfh-fg)]",
+  },
+  maybe: {
+    idle: "border-[var(--status-maybe-surface)] text-[var(--status-maybe)] bg-[var(--status-maybe-surface)]",
+    active: "border-[var(--status-maybe)] bg-[var(--status-maybe)] text-[var(--status-maybe-fg)]",
+  },
+  undecided: {
+    idle: "border-[var(--status-undecided-surface)] text-[var(--status-undecided-fg)] bg-[var(--status-undecided-surface)]",
+    active: "border-[var(--status-undecided)] bg-[var(--status-undecided)] text-[var(--status-undecided-fg)]",
+  },
 };
 
 const PWA_BANNER_KEY = "tg_pwa_banner_dismissed";
@@ -73,7 +85,6 @@ export function HomePage() {
 
   if (loading) return <AppShell><HomeLoadingSkeleton /></AppShell>;
 
-  // Derive date header from targetDate so it's always in sync with what we're showing
   const targetDateObj = summary?.targetDate ? parseISO(summary.targetDate) : new Date();
   const weekday = format(targetDateObj, "EEEE");
   const date = format(targetDateObj, "MMMM d");
@@ -83,65 +94,64 @@ export function HomePage() {
     <AppShell>
       <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-6">
 
-        {/* Header */}
+        {/* Date header */}
         <div>
-          <div className="flex items-center gap-2">
-            <p className="text-muted-foreground text-sm">{weekday}</p>
+          <div className="flex items-center gap-2 mb-0.5">
+            <p className="text-xs text-muted-foreground tracking-widest uppercase">{weekday}</p>
             {isForTomorrow && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                <MoonStar className="size-3" />
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide"
+                style={{ background: "var(--status-maybe-surface)", color: "var(--status-maybe)" }}
+              >
+                <MoonStar className="size-2.5" />
                 tomorrow
               </span>
             )}
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">{date}</h1>
+          <h1 className="font-display text-3xl font-light italic tracking-tight text-foreground">{date}</h1>
           {summary?.todayStatus && summary.todayStatus !== "undecided" && (
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="mt-2 flex items-center gap-2">
               <StatusChip status={summary.todayStatus} size="sm" />
               {summary.todayStatusUpdatedAt && (
-                <span>{formatFreshness(summary.todayStatusUpdatedAt)}</span>
+                <span className="text-[10px] text-muted-foreground">{formatFreshness(summary.todayStatusUpdatedAt)}</span>
               )}
             </div>
           )}
         </div>
 
         {/* Status control */}
-        <Card>
-          <CardContent className="pt-4">
-            <p className="text-sm font-medium mb-3">
-              {isForTomorrow
-                ? "What’s your plan for tomorrow?"
-                : "What’s your plan today?"}
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {STATUS_OPTIONS.map(({ value, label }) => (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground tracking-wider uppercase mb-3">
+            {isForTomorrow ? "Tomorrow's plan" : "Today's plan"}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {STATUS_OPTIONS.map(({ value, label }) => {
+              const isActive = summary?.todayStatus === value;
+              const style = statusButtonStyle[value];
+              return (
                 <button
                   key={value}
-                  data-active={summary?.todayStatus === value}
                   onClick={() => handleStatusUpdate(value)}
                   disabled={updatingStatus !== null}
                   className={cn(
-                    "h-11 rounded-lg border-2 text-sm font-medium transition-all",
-                    "disabled:opacity-50 disabled:cursor-not-allowed",
-                    statusColors[value]
+                    "h-12 rounded-xl border-2 text-sm font-medium transition-all press",
+                    "disabled:opacity-40 disabled:cursor-not-allowed",
+                    isActive ? style.active : style.idle
                   )}
                 >
                   {updatingStatus === value ? "…" : label}
                 </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Pinned people */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-sm flex items-center gap-1.5">
-              <MapPin className="size-4 text-muted-foreground" />
-              Your pinned people
-              {isForTomorrow && (
-                <span className="text-xs font-normal text-muted-foreground">(tomorrow)</span>
-              )}
+            <h2 className="text-xs font-medium text-muted-foreground tracking-wider uppercase flex items-center gap-1.5">
+              <MapPin className="size-3" />
+              Pinned
+              {isForTomorrow && <span className="font-normal">(tomorrow)</span>}
             </h2>
           </div>
           {!summary?.pinnedPeople.length ? (
@@ -152,11 +162,9 @@ export function HomePage() {
             <div className="flex flex-col gap-2">
               {summary.pinnedPeople.map((p) => (
                 <div key={p.userId} className="flex items-center gap-3">
-                  <Avatar className="size-9">
+                  <Avatar className="size-9 ring-1 ring-border shrink-0">
                     <AvatarImage src={p.avatarUrl} alt={p.name} />
-                    <AvatarFallback className="text-xs">
-                      {p.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
+                    <AvatarFallback className="text-xs bg-accent">{p.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{p.name}</p>
@@ -174,21 +182,19 @@ export function HomePage() {
         {/* Room summaries */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-sm flex items-center gap-1.5">
-              <Users className="size-4 text-muted-foreground" />
+            <h2 className="text-xs font-medium text-muted-foreground tracking-wider uppercase flex items-center gap-1.5">
+              <Users className="size-3" />
               Rooms
-              {isForTomorrow && (
-                <span className="text-xs font-normal text-muted-foreground">(tomorrow)</span>
-              )}
+              {isForTomorrow && <span className="font-normal">(tomorrow)</span>}
             </h2>
-            <Link href="/rooms" className="text-xs text-primary underline underline-offset-4">
+            <Link href="/rooms" className="text-xs text-primary hover:opacity-80 transition-opacity">
               See all
             </Link>
           </div>
           {!summary?.rooms.length ? (
             <p className="text-sm text-muted-foreground">
               You&apos;re not in any rooms yet.{" "}
-              <Link href="/rooms" className="underline underline-offset-4">
+              <Link href="/rooms" className="text-primary underline underline-offset-4">
                 Create or join one.
               </Link>
             </p>
@@ -196,22 +202,24 @@ export function HomePage() {
             <div className="flex flex-col gap-2">
               {summary.rooms.map((room) => (
                 <Link key={room.id} href={`/rooms/${room.id}`}>
-                  <Card className="hover:bg-muted/50 transition-colors">
+                  <Card className="hover:bg-accent/40 transition-colors press border-border/60">
                     <CardContent className="py-3 px-4 flex items-center justify-between">
                       <p className="font-medium text-sm">{room.name}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
                         {room.goingCount > 0 && (
-                          <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-xs">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 font-medium"
+                            style={{ background: "var(--status-going-surface)", color: "var(--status-going)" }}>
                             {room.goingCount} going
                           </Badge>
                         )}
                         {room.wfhCount > 0 && (
-                          <Badge variant="secondary" className="bg-sky-100 text-sky-700 text-xs">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 font-medium"
+                            style={{ background: "var(--status-wfh-surface)", color: "var(--status-wfh)" }}>
                             {room.wfhCount} WFH
                           </Badge>
                         )}
                         {room.notUpdatedCount > 0 && (
-                          <span>{room.notUpdatedCount} not updated</span>
+                          <span className="text-[10px] text-muted-foreground">{room.notUpdatedCount} pending</span>
                         )}
                       </div>
                     </CardContent>
@@ -224,16 +232,19 @@ export function HomePage() {
 
         {/* PWA banner */}
         {showPwaBanner && (
-          <Card className="border-primary/20 bg-primary/5">
+          <Card className="border-primary/20" style={{ background: "oklch(72% 0.14 52 / 8%)" }}>
             <CardContent className="py-3 px-4 flex items-start gap-3">
-              <Bell className="size-4 text-primary mt-0.5 shrink-0" />
+              <div className="size-6 rounded-full shrink-0 mt-0.5 flex items-center justify-center"
+                style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                <MapPin className="size-3" />
+              </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">Add to home screen</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Install TeamGlimpse for quick access and reminders.
                 </p>
               </div>
-              <button onClick={dismissPwaBanner} className="text-xs text-muted-foreground underline underline-offset-4 shrink-0">
+              <button onClick={dismissPwaBanner} className="text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0 pt-0.5">
                 Dismiss
               </button>
             </CardContent>
@@ -248,15 +259,15 @@ function HomeLoadingSkeleton() {
   return (
     <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-3 w-16" />
+        <Skeleton className="h-9 w-36" />
       </div>
-      <Skeleton className="h-32 w-full rounded-xl" />
+      <div className="grid grid-cols-2 gap-2">
+        {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-12 rounded-xl" />)}
+      </div>
       <div className="flex flex-col gap-3">
-        <Skeleton className="h-4 w-24" />
-        {[1, 2].map((i) => (
-          <Skeleton key={i} className="h-12 w-full rounded-lg" />
-        ))}
+        <Skeleton className="h-3 w-16" />
+        {[1, 2].map((i) => <Skeleton key={i} className="h-12 rounded-lg" />)}
       </div>
     </div>
   );

@@ -19,6 +19,13 @@ interface Props {
 
 const STATUS_ORDER: DailyStatus[] = ["going", "wfh", "maybe", "undecided"];
 
+const statusIndicator: Record<DailyStatus, string> = {
+  going: "bg-[var(--status-going)]",
+  wfh: "bg-[var(--status-wfh)]",
+  maybe: "bg-[var(--status-maybe)]",
+  undecided: "bg-[var(--status-undecided)]",
+};
+
 export function RoomDetailPage({ params }: Props) {
   const { roomId } = use(params);
   const router = useRouter();
@@ -76,7 +83,7 @@ export function RoomDetailPage({ params }: Props) {
       <AppShell>
         <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-4">
           <Skeleton className="h-7 w-40" />
-          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-4 w-28" />
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
         </div>
       </AppShell>
@@ -86,9 +93,9 @@ export function RoomDetailPage({ params }: Props) {
   if (!room) {
     return (
       <AppShell>
-        <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-6 text-center">
           <p className="text-muted-foreground">Room not found.</p>
-          <Button variant="outline" onClick={() => router.replace("/rooms")}>Back to rooms</Button>
+          <Button variant="outline" onClick={() => router.replace("/rooms")} className="press">Back to rooms</Button>
         </div>
       </AppShell>
     );
@@ -117,30 +124,31 @@ export function RoomDetailPage({ params }: Props) {
         <div>
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-1 text-sm text-muted-foreground mb-3 -ml-1"
+            className="flex items-center gap-1 text-xs text-muted-foreground tracking-wide uppercase mb-3 -ml-0.5 hover:text-foreground transition-colors press"
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="size-3.5" />
             Back
           </button>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight">{room.name}</h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="font-display text-3xl font-light italic tracking-tight">{room.name}</h1>
             {room.isForTomorrow && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                <MoonStar className="size-3" />
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide"
+                style={{ background: "var(--status-maybe-surface)", color: "var(--status-maybe)" }}>
+                <MoonStar className="size-2.5" />
                 tomorrow
               </span>
             )}
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1.5 tracking-wide">
             {summaryParts.join(" · ")}
-            {notUpdated > 0 ? ` · ${notUpdated} not updated` : ""}
+            {notUpdated > 0 ? `${summaryParts.length ? " · " : ""}${notUpdated} not updated` : ""}
           </p>
         </div>
 
         {room.members.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">
+          <p className="text-sm text-muted-foreground py-10 text-center">
             No members yet. Share the invite code{" "}
-            <span className="font-mono font-medium">{room.inviteCode}</span>.
+            <span className="font-mono font-semibold text-foreground">{room.inviteCode}</span>.
           </p>
         ) : (
           STATUS_ORDER.map((status) => {
@@ -148,30 +156,33 @@ export function RoomDetailPage({ params }: Props) {
             if (!members.length) return null;
             return (
               <section key={status}>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  {statusLabel[status]} · {members.length}
-                </p>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`size-1.5 rounded-full shrink-0 ${statusIndicator[status]}`} />
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
+                    {statusLabel[status]} · {members.length}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
                   {members.map((member) => {
                     const isMe = member.userId === currentUserId;
                     const pinned = pinnedIds.has(member.userId);
                     return (
                       <div
                         key={member.userId}
-                        className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-muted/50 transition-colors"
+                        className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-accent/40 transition-colors"
                       >
-                        <Avatar className="size-9 shrink-0">
+                        <Avatar className="size-9 shrink-0 ring-1 ring-border">
                           <AvatarImage src={member.avatarUrl} alt={member.name} />
-                          <AvatarFallback className="text-xs">
+                          <AvatarFallback className="text-xs bg-accent">
                             {member.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">
                             {member.name}
-                            {isMe && <span className="ml-1 text-xs text-muted-foreground">(you)</span>}
+                            {isMe && <span className="ml-1.5 text-[10px] text-muted-foreground font-normal">you</span>}
                           </p>
-                          <p className="text-xs text-muted-foreground truncate">
+                          <p className="text-[11px] text-muted-foreground truncate">
                             {formatFreshness(member.updatedAt)}
                           </p>
                         </div>
@@ -179,14 +190,10 @@ export function RoomDetailPage({ params }: Props) {
                         {!isMe && (
                           <button
                             onClick={() => togglePin(member)}
-                            className="text-muted-foreground hover:text-primary transition-colors ml-1 shrink-0"
+                            className={`ml-1 shrink-0 transition-colors press ${pinned ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
                             title={pinned ? "Unpin" : "Pin to home"}
                           >
-                            {pinned ? (
-                              <PinOff className="size-4" />
-                            ) : (
-                              <Pin className="size-4" />
-                            )}
+                            {pinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
                           </button>
                         )}
                       </div>

@@ -38,12 +38,19 @@ const REMINDER_TIMES = Array.from({ length: 9 }, (_, i) => {
   return { value: `${hh}:${mm}`, label: `${displayH}:${mm} ${ampm}` };
 });
 
-// Evening cutoff options: 3pm–9pm
 const CUTOFF_OPTIONS = [15, 16, 17, 18, 19, 20, 21].map((h) => {
   const ampm = h < 12 ? "AM" : "PM";
   const display = h > 12 ? h - 12 : h;
   return { value: h, label: `${display}:00 ${ampm}` };
 });
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest px-1 mb-2">
+      {children}
+    </p>
+  );
+}
 
 export function SettingsPage() {
   const router = useRouter();
@@ -107,140 +114,157 @@ export function SettingsPage() {
 
   return (
     <AppShell>
-      <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-5">
-        <h1 className="text-xl font-bold tracking-tight">Settings</h1>
+      <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-6">
+        <h1 className="font-display text-3xl font-light italic tracking-tight">Settings</h1>
 
         {/* Profile */}
         {!loading && user && (
-          <Card>
-            <CardContent className="py-4 px-4 flex items-center gap-4">
-              <Avatar className="size-12">
-                <AvatarFallback className="text-sm font-medium">{initials}</AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <p className="font-semibold truncate">{user.name}</p>
-                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <>
+            <SectionLabel>Account</SectionLabel>
+            <Card className="border-border/60">
+              <CardContent className="py-4 px-4 flex items-center gap-4">
+                <Avatar className="size-12 ring-1 ring-border">
+                  <AvatarFallback className="text-sm font-medium bg-accent text-accent-foreground">{initials}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{user.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </>
         )}
 
         {/* Reminder */}
-        <Card>
-          <CardContent className="py-4 px-4 flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Bell className="size-4 text-muted-foreground" />
-                <Label htmlFor="reminder-toggle" className="text-sm font-medium cursor-pointer">
-                  Daily reminder
-                </Label>
+        <div>
+          <SectionLabel>Reminders</SectionLabel>
+          <Card className="border-border/60">
+            <CardContent className="py-4 px-4 flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <Bell className="size-4 text-muted-foreground" />
+                  <Label htmlFor="reminder-toggle" className="text-sm font-medium cursor-pointer">
+                    Daily reminder
+                  </Label>
+                </div>
+                <Switch
+                  id="reminder-toggle"
+                  checked={reminder.enabled}
+                  onCheckedChange={handleReminderToggle}
+                />
               </div>
-              <Switch
-                id="reminder-toggle"
-                checked={reminder.enabled}
-                onCheckedChange={handleReminderToggle}
-              />
-            </div>
-            {reminder.enabled && (
-              <>
-                <Separator />
+              {reminder.enabled && (
+                <>
+                  <Separator className="opacity-50" />
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm text-muted-foreground">Remind me at</Label>
+                    <Select value={reminder.time} onValueChange={(v) => v && handleReminderTime(v)}>
+                      <SelectTrigger className="w-28 h-8 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REMINDER_TIMES.map(({ value, label }) => (
+                          <SelectItem key={value} value={value}>{label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+              <Separator className="opacity-50" />
+              <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm text-muted-foreground">Remind me at</Label>
-                  <Select value={reminder.time} onValueChange={(v) => v && handleReminderTime(v)}>
-                    <SelectTrigger className="w-32 h-8 text-sm">
+                  <div className="flex items-center gap-2.5">
+                    <MoonStar className="size-4 text-muted-foreground" />
+                    <Label className="text-sm font-medium">Show tomorrow after</Label>
+                  </div>
+                  <Select
+                    value={String(reminder.eveningCutoffHour)}
+                    onValueChange={(v) => v && handleCutoffHour(Number(v))}
+                  >
+                    <SelectTrigger className="w-24 h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {REMINDER_TIMES.map(({ value, label }) => (
-                        <SelectItem key={value} value={value}>{label}</SelectItem>
+                      {CUTOFF_OPTIONS.map(({ value, label }) => (
+                        <SelectItem key={value} value={String(value)}>{label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </>
-            )}
-            <Separator />
-            {/* Evening cutoff — always shown, not gated on reminder toggle */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MoonStar className="size-4 text-muted-foreground" />
-                  <Label className="text-sm font-medium">Show tomorrow&apos;s statuses after</Label>
-                </div>
-                <Select
-                  value={String(reminder.eveningCutoffHour)}
-                  onValueChange={(v) => v && handleCutoffHour(Number(v))}
-                >
-                  <SelectTrigger className="w-28 h-8 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CUTOFF_OPTIONS.map(({ value, label }) => (
-                      <SelectItem key={value} value={String(value)}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <p className="text-xs text-muted-foreground pl-7 leading-relaxed">
+                  After this time the app shows tomorrow&apos;s statuses so you can plan ahead.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground pl-6">
-                After this time the app flips to tomorrow so you can plan ahead.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Notifications */}
-        <Card>
-          <CardContent className="py-4 px-4 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              {notifState === "granted" ? (
-                <Bell className="size-4 text-emerald-600" />
-              ) : (
-                <BellOff className="size-4 text-muted-foreground" />
+        <div>
+          <SectionLabel>Push notifications</SectionLabel>
+          <Card className="border-border/60">
+            <CardContent className="py-4 px-4 flex flex-col gap-3">
+              <div className="flex items-center gap-2.5">
+                {notifState === "granted" ? (
+                  <Bell className="size-4" style={{ color: "var(--status-going)" }} />
+                ) : (
+                  <BellOff className="size-4 text-muted-foreground" />
+                )}
+                <span className="text-sm font-medium">
+                  {notifState === "granted" ? "Notifications on" : "Push notifications"}
+                </span>
+              </div>
+              {notifState === "unsupported" && (
+                <p className="text-sm text-muted-foreground">Not supported in this browser.</p>
               )}
-              <span className="text-sm font-medium">Push notifications</span>
-            </div>
-            {notifState === "unsupported" && (
-              <p className="text-sm text-muted-foreground">Push notifications are not supported in this browser.</p>
-            )}
-            {notifState === "default" && (
-              <div className="flex flex-col gap-2">
-                <p className="text-sm text-muted-foreground">Allow notifications to receive daily reminders.</p>
-                <Button variant="outline" size="sm" onClick={handleNotifRequest} className="self-start">
-                  Enable notifications
-                </Button>
-              </div>
-            )}
-            {notifState === "granted" && (
-              <p className="text-sm text-emerald-700">Notifications are enabled.</p>
-            )}
-            {notifState === "denied" && (
-              <div className="flex flex-col gap-1">
-                <p className="text-sm text-destructive">Notifications are blocked.</p>
-                <p className="text-xs text-muted-foreground">Go to your browser settings to re-enable them.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {notifState === "default" && (
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-muted-foreground">Allow notifications to receive daily reminders.</p>
+                  <Button variant="outline" size="sm" onClick={handleNotifRequest} className="self-start press">
+                    Enable notifications
+                  </Button>
+                </div>
+              )}
+              {notifState === "granted" && (
+                <p className="text-sm" style={{ color: "var(--status-going)" }}>Notifications are enabled.</p>
+              )}
+              {notifState === "denied" && (
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm text-destructive">Notifications are blocked.</p>
+                  <p className="text-xs text-muted-foreground">Go to browser settings to re-enable them.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* PWA install */}
         {!isStandalone && (
-          <Card>
-            <CardContent className="py-4 px-4 flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <Smartphone className="size-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Install app</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                On iOS Safari: tap <strong>Share</strong> → <strong>Add to Home Screen</strong>.
-                On Android Chrome: tap the menu → <strong>Install app</strong>.
-              </p>
-            </CardContent>
-          </Card>
+          <div>
+            <SectionLabel>Install app</SectionLabel>
+            <Card className="border-border/60">
+              <CardContent className="py-4 px-4 flex flex-col gap-2">
+                <div className="flex items-center gap-2.5">
+                  <Smartphone className="size-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Add to home screen</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  iOS Safari: tap <strong className="text-foreground">Share</strong> → <strong className="text-foreground">Add to Home Screen</strong>.
+                  Android Chrome: tap the menu → <strong className="text-foreground">Install app</strong>.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
-        {/* Account actions */}
-        <div className="flex flex-col gap-2 pt-2">
-          <Button variant="outline" onClick={handleSignOut} className="flex items-center gap-2">
+        {/* Sign out */}
+        <div className="pt-2 pb-4">
+          <Button
+            variant="outline"
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-2 press text-muted-foreground hover:text-foreground border-border/60"
+          >
             <LogOut className="size-4" />
             Sign out
           </Button>

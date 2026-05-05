@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -55,10 +54,10 @@ export function RoomsPage() {
     <AppShell>
       <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight">Rooms</h1>
-          <Button size="sm" onClick={() => setShowCreate(true)}>
-            <Plus className="size-4 mr-1" />
-            New
+          <h1 className="font-display text-3xl font-light italic tracking-tight">Rooms</h1>
+          <Button size="sm" onClick={() => setShowCreate(true)} className="press gap-1.5">
+            <Plus className="size-4" />
+            New room
           </Button>
         </div>
 
@@ -67,12 +66,12 @@ export function RoomsPage() {
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
           </div>
         ) : rooms.length === 0 ? (
-          <div className="text-center py-12 flex flex-col items-center gap-3">
+          <div className="text-center py-16 flex flex-col items-center gap-4">
             <p className="text-muted-foreground text-sm">No rooms yet.</p>
-            <Button variant="outline" onClick={() => setShowCreate(true)}>
+            <Button variant="outline" onClick={() => setShowCreate(true)} className="press">
               Create your first room
             </Button>
-            <Link href="/join/SETU01" className="text-xs text-primary underline underline-offset-4">
+            <Link href="/join/SETU01" className="text-xs text-primary hover:opacity-80 transition-opacity">
               Join with invite code
             </Link>
           </div>
@@ -80,17 +79,17 @@ export function RoomsPage() {
           <div className="flex flex-col gap-2">
             {rooms.map((room) => (
               <Link key={room.id} href={`/rooms/${room.id}`}>
-                <Card className="hover:bg-muted/50 transition-colors">
+                <Card className="hover:bg-accent/40 transition-colors press border-border/60">
                   <CardContent className="py-4 px-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-sm">{room.name}</p>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{room.name}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {room.memberCount} {room.memberCount === 1 ? "member" : "members"}
+                        <span className="mx-1.5 opacity-40">·</span>
+                        <span className="font-mono tracking-widest text-[10px]">{room.inviteCode}</span>
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-xs font-mono">
-                      {room.inviteCode}
-                    </Badge>
+                    <ChevronRight className="size-4 text-muted-foreground shrink-0 ml-2" />
                   </CardContent>
                 </Card>
               </Link>
@@ -101,10 +100,10 @@ export function RoomsPage() {
         <Dialog open={showCreate} onOpenChange={setShowCreate}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create a room</DialogTitle>
+              <DialogTitle className="font-display font-light italic text-xl">Create a room</DialogTitle>
             </DialogHeader>
             <div className="flex flex-col gap-2 py-2">
-              <Label htmlFor="newRoom">Room name</Label>
+              <Label htmlFor="newRoom" className="text-xs uppercase tracking-wider text-muted-foreground">Room name</Label>
               <Input
                 id="newRoom"
                 value={roomName}
@@ -115,8 +114,8 @@ export function RoomsPage() {
               />
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
-              <Button onClick={handleCreate} disabled={creating}>
+              <Button variant="outline" onClick={() => setShowCreate(false)} className="press">Cancel</Button>
+              <Button onClick={handleCreate} disabled={creating} className="press">
                 {creating ? "Creating…" : "Create"}
               </Button>
             </DialogFooter>

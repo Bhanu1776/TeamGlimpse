@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { format } from "date-fns";
 import { LogOut, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -34,42 +33,39 @@ export function TopBar({ user }: TopBarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border px-4 h-14 flex items-center justify-between">
-      <Link href="/home" className="font-semibold text-base tracking-tight">
+    <header className="sticky top-0 z-40 border-b border-border px-4 h-14 flex items-center justify-between"
+      style={{ background: "oklch(13% 0.012 55 / 85%)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+    >
+      <Link href="/home" className="font-display text-xl font-light italic tracking-wide text-foreground">
         TeamGlimpse
       </Link>
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-muted-foreground hidden sm:block">
-          {format(new Date(), "EEE, MMM d")}
-        </span>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            <Avatar className="size-8">
-              <AvatarImage src={user.avatarUrl} alt={user.name} />
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <div className="px-2 py-1.5">
-              <p className="text-sm font-medium truncate">{user.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem render={<Link href="/settings" />} className="flex items-center gap-2">
-              <Settings className="size-4" />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleSignOut}
-              className="text-destructive focus:text-destructive flex items-center gap-2"
-            >
-              <LogOut className="size-4" />
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+          <Avatar className="size-8 ring-1 ring-border">
+            <AvatarImage src={user.avatarUrl} alt={user.name} />
+            <AvatarFallback className="text-xs bg-accent text-accent-foreground">{initials}</AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52">
+          <div className="px-2 py-2">
+            <p className="text-sm font-medium truncate">{user.name}</p>
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+          </div>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem render={<Link href="/settings" />} className="flex items-center gap-2">
+            <Settings className="size-4" />
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={handleSignOut}
+            className="text-destructive focus:text-destructive flex items-center gap-2"
+          >
+            <LogOut className="size-4" />
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
   );
 }
