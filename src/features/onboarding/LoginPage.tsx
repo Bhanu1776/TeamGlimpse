@@ -23,10 +23,7 @@ export function LoginPage() {
       {/* Ambient glow */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 50% at 50% 60%, oklch(72% 0.14 52 / 8%) 0%, transparent 70%)",
-        }}
+        style={{ background: "radial-gradient(ellipse 70% 50% at 50% 60%, color-mix(in oklch, var(--primary) 15%, transparent) 0%, transparent 70%)" }}
       />
 
       <div className="relative z-10 flex flex-col items-center gap-10 w-full max-w-sm">

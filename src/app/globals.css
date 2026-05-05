@@ -63,8 +63,71 @@
   --color-status-undecided-surface: var(--status-undecided-surface);
 }
 
+/* ── Light theme: Warm Morning ─────────────────────────────────────────────── */
 :root {
-  /* ── Warm Night Desk ── dark-mode-only theme ── */
+  --background:         oklch(97% 0.008 78);
+  --foreground:         oklch(15% 0.012 55);
+  --card:               oklch(100% 0.004 78);
+  --card-foreground:    oklch(15% 0.012 55);
+  --popover:            oklch(100% 0.004 78);
+  --popover-foreground: oklch(15% 0.012 55);
+
+  /* Copper/amber — darker for light bg contrast */
+  --primary:            oklch(52% 0.14 52);
+  --primary-foreground: oklch(99% 0.004 78);
+
+  --secondary:          oklch(93% 0.007 75);
+  --secondary-foreground: oklch(22% 0.012 55);
+  --muted:              oklch(93% 0.007 75);
+  --muted-foreground:   oklch(45% 0.008 65);
+  --accent:             oklch(92% 0.007 75);
+  --accent-foreground:  oklch(15% 0.012 55);
+
+  --destructive:        oklch(53% 0.22 25);
+  --border:             oklch(0% 0 0 / 10%);
+  --input:              oklch(0% 0 0 / 8%);
+  --ring:               oklch(52% 0.14 52 / 40%);
+
+  --radius: 0.75rem;
+
+  --sidebar:                    oklch(95% 0.007 78);
+  --sidebar-foreground:         oklch(15% 0.012 55);
+  --sidebar-primary:            oklch(52% 0.14 52);
+  --sidebar-primary-foreground: oklch(99% 0.004 78);
+  --sidebar-accent:             oklch(92% 0.007 75);
+  --sidebar-accent-foreground:  oklch(15% 0.012 55);
+  --sidebar-border:             oklch(0% 0 0 / 10%);
+  --sidebar-ring:               oklch(52% 0.14 52 / 40%);
+
+  --chart-1: oklch(52% 0.14 52);
+  --chart-2: oklch(44% 0.16 145);
+  --chart-3: oklch(40% 0.15 225);
+  --chart-4: oklch(50% 0.18 68);
+  --chart-5: oklch(42% 0.008 70);
+
+  /* Glass: warm paper at 85% */
+  --glass-bg: oklch(97% 0.008 78 / 88%);
+
+  /* Status — deeper for accessible text on light bg */
+  --status-going:           oklch(44% 0.16 145);
+  --status-going-fg:        oklch(99% 0 0);
+  --status-going-surface:   oklch(44% 0.16 145 / 11%);
+
+  --status-wfh:             oklch(40% 0.15 225);
+  --status-wfh-fg:          oklch(99% 0 0);
+  --status-wfh-surface:     oklch(40% 0.15 225 / 11%);
+
+  --status-maybe:           oklch(50% 0.18 68);
+  --status-maybe-fg:        oklch(99% 0 0);
+  --status-maybe-surface:   oklch(50% 0.18 68 / 11%);
+
+  --status-undecided:         oklch(42% 0.008 70);
+  --status-undecided-fg:      oklch(99% 0 0);
+  --status-undecided-surface: oklch(42% 0.008 70 / 11%);
+}
+
+/* ── Dark theme: Warm Night Desk ───────────────────────────────────────────── */
+.dark {
   --background:         oklch(13% 0.012 55);
   --foreground:         oklch(92% 0.008 75);
   --card:               oklch(17% 0.012 52);
@@ -72,7 +135,6 @@
   --popover:            oklch(19% 0.013 52);
   --popover-foreground: oklch(92% 0.008 75);
 
-  /* Copper/gold primary accent */
   --primary:            oklch(72% 0.14 52);
   --primary-foreground: oklch(12% 0.01 55);
 
@@ -88,9 +150,6 @@
   --input:              oklch(100% 0 0 / 10%);
   --ring:               oklch(72% 0.14 52 / 40%);
 
-  --radius: 0.75rem;
-
-  /* Sidebar (same as card) */
   --sidebar:                    oklch(17% 0.012 52);
   --sidebar-foreground:         oklch(92% 0.008 75);
   --sidebar-primary:            oklch(72% 0.14 52);
@@ -100,25 +159,27 @@
   --sidebar-border:             oklch(100% 0 0 / 8%);
   --sidebar-ring:               oklch(72% 0.14 52 / 40%);
 
-  /* Chart fallbacks */
   --chart-1: oklch(72% 0.14 52);
   --chart-2: oklch(65% 0.16 145);
   --chart-3: oklch(63% 0.15 225);
   --chart-4: oklch(72% 0.16 78);
   --chart-5: oklch(45% 0.008 70);
 
-  /* ── Status palette ── */
-  --status-going:         oklch(65% 0.16 145);
-  --status-going-fg:      oklch(92% 0.008 75);
-  --status-going-surface: oklch(65% 0.16 145 / 15%);
+  /* Glass: deep charcoal at 85% */
+  --glass-bg: oklch(13% 0.012 55 / 85%);
 
-  --status-wfh:           oklch(63% 0.15 225);
-  --status-wfh-fg:        oklch(92% 0.008 75);
-  --status-wfh-surface:   oklch(63% 0.15 225 / 15%);
+  /* Status — vivid for dark surfaces */
+  --status-going:           oklch(65% 0.16 145);
+  --status-going-fg:        oklch(92% 0.008 75);
+  --status-going-surface:   oklch(65% 0.16 145 / 15%);
 
-  --status-maybe:         oklch(72% 0.16 78);
-  --status-maybe-fg:      oklch(12% 0.01 55);
-  --status-maybe-surface: oklch(72% 0.16 78 / 15%);
+  --status-wfh:             oklch(63% 0.15 225);
+  --status-wfh-fg:          oklch(92% 0.008 75);
+  --status-wfh-surface:     oklch(63% 0.15 225 / 15%);
+
+  --status-maybe:           oklch(72% 0.16 78);
+  --status-maybe-fg:        oklch(12% 0.01 55);
+  --status-maybe-surface:   oklch(72% 0.16 78 / 15%);
 
   --status-undecided:         oklch(45% 0.008 70);
   --status-undecided-fg:      oklch(85% 0.008 75);
@@ -131,32 +192,35 @@
   }
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
   html {
     @apply font-sans;
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Refined scrollbar */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: oklch(100% 0 0 / 12%);
+    background: oklch(50% 0 0 / 20%);
     border-radius: 2px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(100% 0 0 / 20%);
+    background: oklch(50% 0 0 / 35%);
   }
 }
 
-/* ── Utility: display / heading font ── */
 .font-display {
   font-family: var(--font-cormorant), Georgia, serif;
 }
 
-/* ── Subtle button press feedback ── */
 @layer utilities {
   .press {
     @apply active:scale-[0.97] transition-transform duration-75;
+  }
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
 }

@@ -15,13 +15,8 @@ export function BottomNav() {
   const pathname = usePathname();
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border flex md:hidden"
-      style={{
-        background: "oklch(13% 0.012 55 / 80%)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        paddingBottom: "env(safe-area-inset-bottom)",
-      }}
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border flex md:hidden glass"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {navItems.map(({ href, label, icon: Icon }) => {
         const active = pathname.startsWith(href);

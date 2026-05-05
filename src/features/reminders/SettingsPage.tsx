@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { AppShell } from "@/components/app-shell/AppShell";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { dataClient } from "@/lib/data/client";
 import { signOut } from "@/lib/auth/session";
 import {
@@ -134,6 +135,20 @@ export function SettingsPage() {
             </Card>
           </>
         )}
+
+        {/* Appearance */}
+        <div>
+          <SectionLabel>Appearance</SectionLabel>
+          <Card className="border-border/60">
+            <CardContent className="py-4 px-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Theme</p>
+                <p className="text-xs text-muted-foreground">Switch between dark and light mode</p>
+              </div>
+              <ThemeToggle />
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Reminder */}
         <div>

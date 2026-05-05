@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Sora } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { SWRegistrar } from "@/components/app-shell/SWRegistrar";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -40,19 +41,21 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${sora.variable} h-full`}>
+    <html lang="en" className={`${cormorant.variable} ${sora.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full bg-background text-foreground font-sans antialiased">
-        {children}
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            classNames: {
-              toast: "!bg-card !border-border !text-foreground !font-sans !text-sm",
-              title: "!font-medium",
-            },
-          }}
-        />
-        <SWRegistrar />
+        <ThemeProvider>
+          {children}
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              classNames: {
+                toast: "!bg-card !border-border !text-foreground !font-sans !text-sm",
+                title: "!font-medium",
+              },
+            }}
+          />
+          <SWRegistrar />
+        </ThemeProvider>
       </body>
     </html>
   );
